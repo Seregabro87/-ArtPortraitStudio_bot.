@@ -4,12 +4,10 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
-# ==============================================================================
-# ВСТАВЬТЕ ВАШ ТОКЕН НИЖЕ (между кавычками):
-BOT_TOKEN = "ВАШ_ТОКЕН_ИЗ_BOTFATHER"
-# ==============================================================================
+# Ваш токен от @BotFather
+BOT_TOKEN = "8803976264:AAHmtJwlXGeS41hWQ5YH0XuZ-bKjZr29oIs"
 
-# Ссылка на ваше WebApp-приложение на GitHub Pages:
+# Ссылка на ваше WebApp-приложение на GitHub Pages
 WEBAPP_URL = "https://seregabro87.github.io/-ArtPortraitStudio_bot/"
 
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +16,6 @@ dp = Dispatcher()
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
-    # Создаём инлайн-кнопку с открытием WebApp
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
