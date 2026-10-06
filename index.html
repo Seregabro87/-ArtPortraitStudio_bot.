@@ -36,6 +36,20 @@
             margin: 15px 0;
             color: #27ae60;
         }
+        button {
+            width: 100%;
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
     </style>
 </head>
 <body>
@@ -62,43 +76,15 @@
         <input type="text" id="phone" placeholder="+7 (999) 000-00-00">
 
         <div class="price" id="totalPrice">Итого: 2 500 ₽</div>
+
+        <button id="btn" onclick="sendOrder()">Оформить заказ</button>
     </div>
 
     <script>
         const tg = window.Telegram ? window.Telegram.WebApp : null;
-
         if (tg) {
             tg.ready();
             tg.expand();
-
-            // Настраиваем встроенную кнопку Telegram внизу экрана
-            tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
-            tg.MainButton.show();
-
-            tg.MainButton.onClick(function() {
-                let style = document.getElementById('style').value;
-                let size = document.getElementById('size').value;
-                let phone = document.getElementById('phone').value;
-                let price = document.getElementById('totalPrice').innerText;
-
-                if (!phone.trim()) {
-                    alert('Пожалуйста, укажите ваш номер телефона или контакт для связи.');
-                    return;
-                }
-
-                let data = {
-                    style: style,
-                    size: size,
-                    phone: phone,
-                    price: price
-                };
-
-                try {
-                    tg.sendData(JSON.stringify(data));
-                } catch (e) {
-                    alert('Пожалуйста, отправьте команду /start боту и откройте форму из сообщения.');
-                }
-            });
         }
 
         function calculatePrice() {
@@ -106,9 +92,65 @@
             let price = sizeSelect.options[sizeSelect.selectedIndex].getAttribute('data-price');
             document.getElementById('totalPrice').innerText = 'Итого: ' + Number(price).toLocaleString('ru-RU') + ' ₽';
         }
+
+        async function sendOrder() {
+            let style = document.getElementById('style').value;
+            let size = document.getElementById('size').value;
+            let phone = document.getElementById('phone').value;
+            let price = document.getElementById('totalPrice').innerText;
+
+            if (!phone.trim()) {
+                alert('Пожалуйста, укажите ваш номер телефона или контакт для связи.');
+                return;
+            }
+
+            let btn = document.getElementById('btn');
+            btn.disabled = true;
+            btn.innerText = 'Отправка...';
+
+            let botToken = "8803976264:AAHmtJwlXGeS41hWQ5YH0XuZ-bKjZr29oIs";
+            let adminId = "5696485393";
+
+            let user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
+            let userName = user ? `${user.first_name} (@${user.username || 'нет_юзернейма'})` : "Гость";
+
+            let messageText = `🎉 **Новый заказ на портрет!**\n\n` +
+                              `👤 **Заказчик:** ${userName}\n` +
+                              `🎨 **Стиль:** ${style}\n` +
+                              `📐 **Размер:** ${size}\n` +
+                              `📞 **Контакты:** ${phone}\n` +
+                              `💰 **Сумма:** ${price}`;
+
+            try {
+                // Прямой запрос в Telegram Bot API
+                let response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: adminId,
+                        text: messageText,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Спасибо за заказ! Мы получили вашу заявку и скоро свяжемся с вами.');
+                    if (tg) tg.close();
+                } else {
+                    alert('Ошибка при отправке. Попробуйте еще раз.');
+                    btn.disabled = false;
+                    btn.innerText = 'Оформить заказ';
+                }
+            } catch (e) {
+                alert('Ошибка соединения с интернетом.');
+                btn.disabled = false;
+                btn.innerText = 'Оформить заказ';
+            }
+        }
     </script>
 </body>
 </html>
+
 
 
 
