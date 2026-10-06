@@ -36,17 +36,6 @@
             margin: 15px 0;
             color: #27ae60;
         }
-        button {
-            width: 100%;
-            background-color: var(--tg-theme-button-color, #0088cc);
-            color: var(--tg-theme-button-text-color, #fff);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -73,15 +62,43 @@
         <input type="text" id="phone" placeholder="+7 (999) 000-00-00">
 
         <div class="price" id="totalPrice">Итого: 2 500 ₽</div>
-
-        <button id="submitBtn" onclick="sendData()">Оформить заказ</button>
     </div>
 
     <script>
         const tg = window.Telegram ? window.Telegram.WebApp : null;
+
         if (tg) {
             tg.ready();
             tg.expand();
+
+            // Настраиваем встроенную кнопку Telegram внизу экрана
+            tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
+            tg.MainButton.show();
+
+            tg.MainButton.onClick(function() {
+                let style = document.getElementById('style').value;
+                let size = document.getElementById('size').value;
+                let phone = document.getElementById('phone').value;
+                let price = document.getElementById('totalPrice').innerText;
+
+                if (!phone.trim()) {
+                    alert('Пожалуйста, укажите ваш номер телефона или контакт для связи.');
+                    return;
+                }
+
+                let data = {
+                    style: style,
+                    size: size,
+                    phone: phone,
+                    price: price
+                };
+
+                try {
+                    tg.sendData(JSON.stringify(data));
+                } catch (e) {
+                    alert('Пожалуйста, отправьте команду /start боту и откройте форму из сообщения.');
+                }
+            });
         }
 
         function calculatePrice() {
@@ -89,38 +106,10 @@
             let price = sizeSelect.options[sizeSelect.selectedIndex].getAttribute('data-price');
             document.getElementById('totalPrice').innerText = 'Итого: ' + Number(price).toLocaleString('ru-RU') + ' ₽';
         }
-
-        function sendData() {
-            let style = document.getElementById('style').value;
-            let size = document.getElementById('size').value;
-            let phone = document.getElementById('phone').value;
-            let price = document.getElementById('totalPrice').innerText;
-
-            if (!phone.trim()) {
-                alert('Пожалуйста, укажите ваш номер телефона или контакт для связи.');
-                return;
-            }
-
-            let data = {
-                style: style,
-                size: size,
-                phone: phone,
-                price: price
-            };
-
-            if (tg) {
-                try {
-                    tg.sendData(JSON.stringify(data));
-                } catch (e) {
-                    alert('Для отправки заказа откройте приложение через кнопку под сообщением бота!');
-                }
-            } else {
-                alert('Ошибка подключения к Telegram.');
-            }
-        }
     </script>
 </body>
 </html>
+
 
 
 
