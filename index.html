@@ -3,46 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заказ портрета</title>
+    <title>Оформить заказ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            padding: 20px;
-            text-align: center;
+            background-color: var(--tg-theme-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #333);
+            padding: 15px;
+            margin: 0;
         }
-        .container {
-            background: white;
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #fff);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        h2 { color: #0088cc; }
+        h2 { text-align: center; color: var(--tg-theme-button-color, #0088cc); margin-top: 0; }
+        label { font-weight: bold; display: block; margin-top: 12px; margin-bottom: 5px; }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            color: #27ae60;
+        }
         button {
-            background-color: #0088cc;
-            color: white;
+            width: 100%;
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #fff);
             border: none;
-            padding: 12px 24px;
+            padding: 12px;
             border-radius: 8px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🎨 Студия портретов по фото</h2>
-        <p>Выберите параметры вашего портрета и оформите заказ прямо здесь!</p>
-        <button onclick="tg.close()">Закрыть окно</button>
+    <div class="card">
+        <h2>🎨 Заказ портрета</h2>
+        
+        <label for="style">Стиль портрета:</label>
+        <select id="style">
+            <option value="Масло">🎨 Живопись маслом</option>
+            <option value="Акварель">🖌️ Акварель</option>
+            <option value="Digital Art">💻 Digital Art / Цифровой</option>
+            <option value="Карандаш">✏️ Графика / Карандаш</option>
+        </select>
+
+        <label for="size">Размер холста:</label>
+        <select id="size" onchange="calculatePrice()">
+            <option value="30x40" data-price="2500">30 x 40 см — 2 500 ₽</option>
+            <option value="40x60" data-price="3500">40 x 60 см — 3 500 ₽</option>
+            <option value="50x70" data-price="4500">50 x 70 см — 4 500 ₽</option>
+            <option value="60x80" data-price="6000">60 x 80 см — 6 000 ₽</option>
+        </select>
+
+        <label for="phone">Ваш номер телефона / Telegram:</label>
+        <input type="text" id="phone" placeholder="+7 (999) 000-00-00">
+
+        <div class="price" id="totalPrice">Итого: 2 500 ₽</div>
+
+        <button onclick="sendData()">Оформить заказ</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+
+        function calculatePrice() {
+            let sizeSelect = document.getElementById('size');
+            let price = sizeSelect.options[sizeSelect.selectedIndex].getAttribute('data-price');
+            document.getElementById('totalPrice').innerText = 'Итого: ' + Number(price).toLocaleString('ru-RU') + ' ₽';
+        }
+
+        function sendData() {
+            let style = document.getElementById('style').value;
+            let size = document.getElementById('size').value;
+            let phone = document.getElementById('phone').value;
+            let price = document.getElementById('totalPrice').innerText;
+
+            if (!phone.trim()) {
+                alert('Пожалуйста, укажите ваш номер телефона или контакт для связи.');
+                return;
+            }
+
+            let data = {
+                style: style,
+                size: size,
+                phone: phone,
+                price: price
+            };
+
+            tg.sendData(JSON.stringify(data));
+        }
     </script>
 </body>
 </html>
+
 
